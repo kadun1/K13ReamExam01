@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="geolocation.SearchRadiusImpl">
+	<select id="searchCount" resultType="int">
+		select count(*)
+		from global_facility
+		where trunc(to_number(distnace_wgs84(#{param2}, #{param3},
+		hp_latitude, hp_longitude)),5)<![CDATA[<=]]>#{param1}
+	</select>
+	
+	<select id="searchRadius" resultType="geolocation.MyFacilityDTO">
+		select * from (
+   		  select Tb.*, rownum rNum from (
+ 			 select
+ 			 	hp_name, hp_sido, hp_gugun, hp_addr, hp_url, hp_latitude, hp_longitude,
+     		 	trunc(to_number(distnace_wgs84(#{param2}, #{param3}, hp_latitude, hp_longitude)), 5) AS disKM
+     		 from global_facility
+ 			 where trunc(to_number(distnace_wgs84(#{param2}, #{param3}, hp_latitude, hp_longitude)), 5)<![CDATA[<=]]>#{param1}
+     		 order by disKM asc
+	      ) Tb
+		)
+		where rNum between ${param4} and ${param5}
+	</select>
+</mapper>  
+
